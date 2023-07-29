@@ -1,0 +1,17 @@
+{
+  "name": "LabTemplate",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "hari@xnsio.com",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "29.5.3",
+    "jest": "29.6.1",
+    "ts-jest": "29.1.1",
+    "typescript": "5.1.6"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "test": "jest"
+  }
+}
