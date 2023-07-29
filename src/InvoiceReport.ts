@@ -6,14 +6,11 @@ export class InvoiceReport {
     private GSTRate: number;
     private monthlyUsageByCompanyMap: { [key: string]: number } = {};
 
-    // create  a map in typescript
-    // https://stackoverflow.com/questions/14810506/map-in-typescript
     constructor(monthlyUsageByCompany: string, inputParser: any, GstRate: any) {
         this.monthlyUsageByCompany = monthlyUsageByCompany;
         this.billingFormat = inputParser;
         this.GSTRate = GstRate;
         this.monthlyUsageByCompanyMap = this.billingFormat.parse(monthlyUsageByCompany);
-        console.log(this.monthlyUsageByCompanyMap);
     }
 
     generageBillingForOpenSeatings(numberOfOpenSeatings: number) {
@@ -25,9 +22,13 @@ export class InvoiceReport {
         return billing;
     }
 
-    generateBillingReport() {
-        let billingReport = '';
+    generateBillingReport(): string {
+        let billingReport:string = '';
+        let index:number = 0;
         for (let key in this.monthlyUsageByCompanyMap) {
+            if(index > 0 ){
+                billingReport += '\n';
+            }
             if (key === 'Open Seats') {
                 let numberOfOpenSeatings = this.monthlyUsageByCompanyMap[key];
                 let billing = this.generageBillingForOpenSeatings(numberOfOpenSeatings);
@@ -38,6 +39,8 @@ export class InvoiceReport {
                 let billing = this.generateBillingForCabinSeatings(numberOfCabinSeatings);
                 billingReport += `${numberOfCabinSeatings} Cabin Seats : ${billing}`;
             }
+
+            index++;
         }
         return billingReport;
     }

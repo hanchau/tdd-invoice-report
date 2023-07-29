@@ -33,4 +33,19 @@ describe('Invoice Report Tests', function () {
     });
 
 
+    it('should generate a combined billing report for Open Seatings and Cabin Seatings', function () {
+        let monthlyUsageByCompany = "2 Open Seats\n3 Cabin Seats"
+        let GSTRate = 0.18;
+        let expectedBillingReport = '2 Open Seats : 11800' + '\n' + '3 Cabin Seats : 35400';
+        let billingFormat = new BillingFormat();
+
+        // Act
+        let invoiceReport = new InvoiceReport(monthlyUsageByCompany, billingFormat, GSTRate);
+        let actualBilling = invoiceReport.generateBillingReport();
+
+        // Assert
+        expect(actualBilling).toBe(expectedBillingReport);
+    });
+
+
 });
