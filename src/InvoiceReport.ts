@@ -29,6 +29,20 @@ export class InvoiceReport {
         return 10000 * numberOfCabinSeatings * this.GSTRate;
     }
 
+    private generateChargeForConferenceRoomUsage(numberOfConferenceHours: number) {
+        let numberOfCabinSeatings = this.monthlyUsageByCompanyMap['Cabin Seats'];
+        let numberOfOpenSeatings = this.monthlyUsageByCompanyMap['Open Seats'];
+        let freeConferenceRoomUsageLimit = + numberOfOpenSeatings * 5 + numberOfCabinSeatings * 10;
+        return Math.max(numberOfConferenceHours - freeConferenceRoomUsageLimit, 0) * 200;
+    }
+
+    private generateGSTForConferenceRoomUsage(numberOfConferenceHours: number) {
+        let numberOfCabinSeatings = this.monthlyUsageByCompanyMap['Cabin Seats'];
+        let numberOfOpenSeatings = this.monthlyUsageByCompanyMap['Open Seats'];
+        let freeConferenceRoomUsageLimit = + numberOfOpenSeatings * 5 + numberOfCabinSeatings * 10;
+        return Math.max(numberOfConferenceHours - freeConferenceRoomUsageLimit, 0) * 200 * this.GSTRate;
+    }
+
     generateBillingReport(): string {
         let billingReport:string = '';
         let totalBilling:number = 0;
@@ -43,17 +57,28 @@ export class InvoiceReport {
                 let numberOfOpenSeatings:number = this.monthlyUsageByCompanyMap[key];
                 let charge:number = this.generateChargeForOpenSeatings(numberOfOpenSeatings);
                 let gstCharge: number = this.generageGSTForOpenSeatings(numberOfOpenSeatings);
-                billingReport += `${numberOfOpenSeatings} Open Seats: ${charge + gstCharge}`;
+                billingReport += `${numberOfOpenSeatings} ${key}: ${charge + gstCharge}`;
+                totalBilling += charge + gstCharge;
+                totalGST += gstCharge;
+            }
+            else if (key === 'Cabin Seats'){
+                let numberOfCabinSeatings:number = this.monthlyUsageByCompanyMap[key];
+                let charge:number = this.generateChargeForCabinSeatings(numberOfCabinSeatings);
+                let gstCharge: number = this.generageGSTForCabinSeatings(numberOfCabinSeatings);
+                billingReport += `${numberOfCabinSeatings} ${key}: ${charge + gstCharge}`;
+                totalBilling += charge + gstCharge;
+                totalGST += gstCharge;
+            }
+            else if (key === 'hours of Conference Room usage') {
+                let numberOfConferenceHours:number = this.monthlyUsageByCompanyMap[key];
+                let charge:number = this.generateChargeForConferenceRoomUsage(numberOfConferenceHours);
+                let gstCharge: number = this.generateGSTForConferenceRoomUsage(numberOfConferenceHours);
+                billingReport += `${numberOfConferenceHours} ${key}: ${charge + gstCharge}`;
                 totalBilling += charge + gstCharge;
                 totalGST += gstCharge;
             }
             else{
-                let numberOfCabinSeatings:number = this.monthlyUsageByCompanyMap[key];
-                let charge:number = this.generateChargeForCabinSeatings(numberOfCabinSeatings);
-                let gstCharge: number = this.generageGSTForCabinSeatings(numberOfCabinSeatings);
-                billingReport += `${numberOfCabinSeatings} Cabin Seats: ${charge + gstCharge}`;
-                totalBilling += charge + gstCharge;
-                totalGST += gstCharge;
+                throw new Error('Invalid usage type');
             }
             index++;
         }
