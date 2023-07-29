@@ -13,18 +13,31 @@ export class InvoiceReport {
         this.billingFormat = inputParser;
         this.GSTRate = GstRate;
         this.monthlyUsageByCompanyMap = this.billingFormat.parse(monthlyUsageByCompany);
+        console.log(this.monthlyUsageByCompanyMap);
     }
 
     generageBillingForOpenSeatings(numberOfOpenSeatings: number) {
         return 5000 * numberOfOpenSeatings * (1 + this.GSTRate);
     }
 
+    generateBillingForCabinSeatings(numberOfCabinSeatings: number) {
+        let billing = 10000 * numberOfCabinSeatings * (1 + this.GSTRate);
+        return billing;
+    }
+
     generateBillingReport() {
         let billingReport = '';
         for (let key in this.monthlyUsageByCompanyMap) {
-            let numberOfOpenSeatings = this.monthlyUsageByCompanyMap[key];
-            let billing = this.generageBillingForOpenSeatings(numberOfOpenSeatings);
-            billingReport += `${numberOfOpenSeatings} Open Seats : ${billing}`;
+            if (key === 'Open Seats') {
+                let numberOfOpenSeatings = this.monthlyUsageByCompanyMap[key];
+                let billing = this.generageBillingForOpenSeatings(numberOfOpenSeatings);
+                billingReport += `${numberOfOpenSeatings} Open Seats : ${billing}`;
+            }
+            else{
+                let numberOfCabinSeatings = this.monthlyUsageByCompanyMap[key];
+                let billing = this.generateBillingForCabinSeatings(numberOfCabinSeatings);
+                billingReport += `${numberOfCabinSeatings} Cabin Seats : ${billing}`;
+            }
         }
         return billingReport;
     }

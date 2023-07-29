@@ -5,7 +5,7 @@ export class BillingFormat {
         const [countStr, type] = companyUsageFormat.split(' ');
         const quantityOfItem = parseInt(countStr);
         if (!isNaN(quantityOfItem)) {
-            outputUsageMap[type + ' ' + type.slice(-1) === 's' ? 'Seats' : 'Seat'] = quantityOfItem;
+            outputUsageMap[type + (quantityOfItem !== 1 ? ' Seats' : ' Seat')] = quantityOfItem;
         }
         return outputUsageMap;
     }
