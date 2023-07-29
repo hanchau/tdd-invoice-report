@@ -1,5 +1,4 @@
-import {InvoiceReport} from "../src/InvoiceReport";
-import {BillingFormat} from "../src/BillingFormat";
+import {InvoiceReport, BillingFormat} from "../src/InvoiceReport";
 
 describe('Invoice Report Tests', function () {
 

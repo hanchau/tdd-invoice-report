@@ -1,4 +1,20 @@
-import {BillingFormat} from "./BillingFormat";
+export class BillingFormat {
+
+    parse(inputString: string) {
+        const resultMap: { [key: string]: number } = {};
+
+        const lines: string[] = inputString.split('\n');
+        for (const line of lines) {
+            const [countStr, ...descriptionArray] = line.split(' ');
+            const count = parseInt(countStr);
+            if (!isNaN(count)) {
+                const description = descriptionArray.join(' ');
+                resultMap[description] = count;
+            }
+        }
+        return resultMap
+    }
+}
 
 export class InvoiceReport {
     private monthlyUsageByCompany: string;
@@ -49,33 +65,33 @@ export class InvoiceReport {
         let totalGST:number = 0;
         let index:number = 0;
 
-        for (let key in this.monthlyUsageByCompanyMap) {
+        for (let descriptionOfBillingItem in this.monthlyUsageByCompanyMap) {
             if(index > 0 ){
                 billingReport += '\n';
             }
-            if (key === 'Open Seats') {
-                let numberOfOpenSeatings:number = this.monthlyUsageByCompanyMap[key];
-                let charge:number = this.generateChargeForOpenSeatings(numberOfOpenSeatings);
-                let gstCharge: number = this.generageGSTForOpenSeatings(numberOfOpenSeatings);
-                billingReport += `${numberOfOpenSeatings} ${key}: ${charge + gstCharge}`;
-                totalBilling += charge + gstCharge;
-                totalGST += gstCharge;
+            if (descriptionOfBillingItem === 'Open Seats') {
+                let numberOfOpenSeatings:number = this.monthlyUsageByCompanyMap[descriptionOfBillingItem];
+                let chargeForUnitsOfBillingItem:number = this.generateChargeForOpenSeatings(numberOfOpenSeatings);
+                let gstChargeForUnitsOfBillingItem: number = this.generageGSTForOpenSeatings(numberOfOpenSeatings);
+                billingReport += `${numberOfOpenSeatings} ${descriptionOfBillingItem}: ${chargeForUnitsOfBillingItem + gstChargeForUnitsOfBillingItem}`;
+                totalBilling += chargeForUnitsOfBillingItem + gstChargeForUnitsOfBillingItem;
+                totalGST += gstChargeForUnitsOfBillingItem;
             }
-            else if (key === 'Cabin Seats'){
-                let numberOfCabinSeatings:number = this.monthlyUsageByCompanyMap[key];
-                let charge:number = this.generateChargeForCabinSeatings(numberOfCabinSeatings);
-                let gstCharge: number = this.generageGSTForCabinSeatings(numberOfCabinSeatings);
-                billingReport += `${numberOfCabinSeatings} ${key}: ${charge + gstCharge}`;
-                totalBilling += charge + gstCharge;
-                totalGST += gstCharge;
+            else if (descriptionOfBillingItem === 'Cabin Seats'){
+                let numberOfCabinSeatings:number = this.monthlyUsageByCompanyMap[descriptionOfBillingItem];
+                let chargeForUnitsOfBillingItem:number = this.generateChargeForCabinSeatings(numberOfCabinSeatings);
+                let gstChargeForUnitsOfBillingItem: number = this.generageGSTForCabinSeatings(numberOfCabinSeatings);
+                billingReport += `${numberOfCabinSeatings} ${descriptionOfBillingItem}: ${chargeForUnitsOfBillingItem + gstChargeForUnitsOfBillingItem}`;
+                totalBilling += chargeForUnitsOfBillingItem + gstChargeForUnitsOfBillingItem;
+                totalGST += gstChargeForUnitsOfBillingItem;
             }
-            else if (key === 'hours of Conference Room usage') {
-                let numberOfConferenceHours:number = this.monthlyUsageByCompanyMap[key];
-                let charge:number = this.generateChargeForConferenceRoomUsage(numberOfConferenceHours);
-                let gstCharge: number = this.generateGSTForConferenceRoomUsage(numberOfConferenceHours);
-                billingReport += `${numberOfConferenceHours} ${key}: ${charge + gstCharge}`;
-                totalBilling += charge + gstCharge;
-                totalGST += gstCharge;
+            else if (descriptionOfBillingItem === 'hours of Conference Room usage') {
+                let numberOfConferenceHours:number = this.monthlyUsageByCompanyMap[descriptionOfBillingItem];
+                let chargeForUnitsOfBillingItem:number = this.generateChargeForConferenceRoomUsage(numberOfConferenceHours);
+                let gstChargeForUnitsOfBillingItem: number = this.generateGSTForConferenceRoomUsage(numberOfConferenceHours);
+                billingReport += `${numberOfConferenceHours} ${descriptionOfBillingItem}: ${chargeForUnitsOfBillingItem + gstChargeForUnitsOfBillingItem}`;
+                totalBilling += chargeForUnitsOfBillingItem + gstChargeForUnitsOfBillingItem;
+                totalGST += gstChargeForUnitsOfBillingItem;
             }
             else{
                 throw new Error('Invalid usage type');
