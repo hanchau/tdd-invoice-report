@@ -1,4 +1,5 @@
-import {InvoiceService, ReportFormat} from "../src/InvoiceService";
+import {InvoiceService} from "../src/InvoiceService";
+import {ReportFormat} from "../src/ReportFormat";
 
 describe('Invoice Report Tests', function () {
     let gstRates: Map<string, number>;
