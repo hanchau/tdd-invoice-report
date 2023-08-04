@@ -3,25 +3,37 @@ class BillingItem {
     private description: string;
     private GSTRate: number;
     private unitPrice: number;
-    private totalCost: number;
-    private totaGSTCost: number;
+    private totalCost: number | undefined;
+    private totalGSTCost: number | undefined;
+    private freeConferenceHoursPerUnit: number | null;
+    private totalFreeConferenceHours: number | null;
+    private parentBillingItemsReference: BillingItems;
 
 
-    constructor(description: string, quantity: number, GSTRate: number, price: any) {
+    constructor(description: string, quantity: number, GSTRate: number, price: any, freeConferenceHoursPerUnit: number | null, parentBillingItemsReference: BillingItems) {
         this.quantity = quantity;
         this.description = description;
         this.GSTRate = GSTRate;
         this.unitPrice = price;
-        this.totalCost = this.calculateTotalCost();
-        this.totaGSTCost = this.calculateTotalGSTCost();
+        this.freeConferenceHoursPerUnit = freeConferenceHoursPerUnit;
+        this.parentBillingItemsReference = parentBillingItemsReference;
+        this.totalFreeConferenceHours = this.freeConferenceHoursPerUnit ? this.freeConferenceHoursPerUnit * this.quantity : null
     }
 
     private calculateTotalGSTCost() {
-        return this.quantity * this.unitPrice * this.GSTRate;
+        if(this.getDescription() === 'hours of Conference Room usage') {
+            const freeConferenceHoursOfOtherServices = this.parentBillingItemsReference.getFreeConferenceHours() || 0;
+            return Math.floor(Math.max((this.quantity - freeConferenceHoursOfOtherServices)* this.unitPrice * (this.GSTRate), 0));
+        }
+        return Math.floor(this.quantity * this.unitPrice * this.GSTRate);
     }
 
     private calculateTotalCost() {
-        return this.quantity * this.unitPrice * (1 + this.GSTRate);
+        if(this.getDescription() === 'hours of Conference Room usage') {
+            const freeConferenceHoursOfOtherServices = this.parentBillingItemsReference.getFreeConferenceHours() || 0;
+            return Math.floor(Math.max((this.quantity - freeConferenceHoursOfOtherServices)* this.unitPrice * (1 + this.GSTRate), 0));
+        }
+        return Math.floor(this.quantity * this.unitPrice * (1 + this.GSTRate));
     }
 
     getQuantity() {
@@ -33,20 +45,26 @@ class BillingItem {
     }
 
     getTotalCost() {
+        this.totalCost = this.calculateTotalCost();
         return this.totalCost;
     }
 
     getTotalGSTCost() {
-        return this.totaGSTCost;
+        this.totalGSTCost = this.calculateTotalGSTCost();
+        return this.totalGSTCost;
     }
 
+    getTotalFreConferenceHours() {
+        return this.totalFreeConferenceHours;
+    }
 }
 
 class BillingItems {
     private billingItemsList: BillingItem[] = [];
 
-    add(descriptionOfBillingItem: string, unitsOfBillingItem: number, GSTRate: number, priceOfBillingItem: number) {
-        this.billingItemsList.push(new BillingItem(descriptionOfBillingItem, unitsOfBillingItem, GSTRate, priceOfBillingItem));
+    addItemWithInfo(descriptionOfBillingItem: string, unitsOfBillingItem: number, GSTRate: number, priceOfBillingItem: number, freeConferenceHours: number | null, billingItems: BillingItems) {
+        let billingItem = new BillingItem(descriptionOfBillingItem, unitsOfBillingItem, GSTRate, priceOfBillingItem, freeConferenceHours, billingItems);
+        this.billingItemsList.push(billingItem);
     }
 
     getTotalCost() {
@@ -60,12 +78,16 @@ class BillingItems {
     getBillingItems(): BillingItem[] {
         return this.billingItemsList;
     }
+
+    getFreeConferenceHours(): number {
+        return this.billingItemsList.reduce((freeConferenceHours, billingItem) => freeConferenceHours + (billingItem.getTotalFreConferenceHours() || 0), 0);
+    }
 }
 
 
 export class ReportFormat {
 
-    generateBillingItems(monthlyUsageByClient: string, GSTRateList: Map<string, number>, ServicePriceList: Map<string, number>) {
+    generateBillingItems(monthlyUsageByClient: string, GSTRateList: Map<string, number>, ServicePriceList: Map<string, number>, freeConferenceHours: Map<string, number>) {
         const billingItems = new BillingItems();
         const lines: string[] = monthlyUsageByClient.split('\n');
         for (const line of lines) {
@@ -75,7 +97,7 @@ export class ReportFormat {
             if (!GSTRateList.has(descriptionOfItems)) {
                 throw new Error('Invalid usage type');
             }
-            billingItems.add(descriptionOfItems, noOfItems, (GSTRateList.get(descriptionOfItems) || 0), (ServicePriceList.get(descriptionOfItems) || 0));
+            billingItems.addItemWithInfo(descriptionOfItems, noOfItems, (GSTRateList.get(descriptionOfItems) || 0), (ServicePriceList.get(descriptionOfItems) || 0), (freeConferenceHours.get(descriptionOfItems) || null), billingItems);
         }
         return billingItems;
     }
@@ -93,22 +115,23 @@ export class ReportFormat {
 
 export class InvoiceService {
     private monthlyUsageByClient: string;
-    private GSTRateList: Map<string, number>;
-    private ServicePriceList: Map<string, number>;
-    private FreeConferenceHours: Map<string, number>;
+    private gstRateList: Map<string, number>;
+    private servicePrices: Map<string, number>;
+    private freeConferenceHours: Map<string, number>;
+    private reportFormat: ReportFormat;
 
-    constructor(monthlyUsageByClient: string, reportFormat: ReportFormat, GstRate: Map<string, number>, ServicePriceList: Map<string, number>, FreeConferenceHours: Map<string, number>) {
+    constructor(monthlyUsageByClient: string, reportFormat: ReportFormat, gstRateList: Map<string, number>, servicePrices: Map<string, number>, freeConferenceHours: Map<string, number>) {
         this.monthlyUsageByClient = monthlyUsageByClient;
-        this.GSTRateList = GstRate;
-        this.ServicePriceList = ServicePriceList;
-        this.FreeConferenceHours = FreeConferenceHours;
+        this.reportFormat = reportFormat;
+        this.gstRateList = gstRateList;
+        this.servicePrices = servicePrices;
+        this.freeConferenceHours = freeConferenceHours;
     }
 
     generateInvoiceReport(): string {
         let invoiceReport:string = '';
-        let reportFormat = new ReportFormat();
-        let billingItems = reportFormat.generateBillingItems(this.monthlyUsageByClient, this.GSTRateList, this.ServicePriceList);
-        invoiceReport = reportFormat.generateReport(billingItems);
+        let billingItems = this.reportFormat.generateBillingItems(this.monthlyUsageByClient, this.gstRateList, this.servicePrices, this.freeConferenceHours);
+        invoiceReport = this.reportFormat.generateReport(billingItems);
 
         return invoiceReport;
     }
