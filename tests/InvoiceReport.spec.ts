@@ -6,6 +6,7 @@ describe('Invoice Report Tests', function () {
     let servicePrices: Map<string, number>;
     let reportFormat: ReportFormat;
     let freeConferenceHours: Map<string, number>;
+    let servicesOffered = ["Open Seats", "Cabin Seats", "hours of Conference Room usage", "Meals"];
 
     beforeEach(function () {
         gstRates = new Map([
@@ -33,7 +34,7 @@ describe('Invoice Report Tests', function () {
     it('should throw an error when invalid input is given', function () {
         let monthlyUsageByClient = "2 Balcony Seats\n4 Open Seats\n3 Cabin Seats"
 
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
         // Assert
         expect(()=> {
             invoiceService.generateInvoiceReport()
@@ -54,7 +55,7 @@ describe('Invoice Report Tests', function () {
 
         // Act
         let monthlyUsageByClient = "2 Open Seats";
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
 
         // Assert
         expect(invoiceService.generateInvoiceReport()).toBe(expectedInvoiceReport);
@@ -75,7 +76,7 @@ describe('Invoice Report Tests', function () {
 
         // Act
         let monthlyUsageByClient = "3 Cabin Seats";
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
 
         // Assert
         expect(invoiceService.generateInvoiceReport()).toBe(expectedInvoiceReport);
@@ -91,7 +92,7 @@ describe('Invoice Report Tests', function () {
                                         + '\nTotal GST: ' + `${10000 * 3 * GSTRate + 5000 * 2 * GSTRate}`;
 
         // Act
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
 
         // Assert
         expect(invoiceService.generateInvoiceReport()).toBe(expectedInvoiceReport);
@@ -107,7 +108,7 @@ describe('Invoice Report Tests', function () {
                                         + '\nTotal GST: ' + `${10000 * 3 * GSTRate + 5000 * 2 * GSTRate}`;
 
         // Act
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
 
         // Assert
         expect(invoiceService.generateInvoiceReport()).toBe(expectedInvoiceReport);
@@ -126,7 +127,7 @@ describe('Invoice Report Tests', function () {
                                         + '\nTotal GST: ' + `${(10000 * 3 * GSTRate) + (5000 * 2 * GSTRate) + (5 * 200 * GSTRate)}`;
 
         // Act
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
 
         let generateInvoiceReport = invoiceService.generateInvoiceReport();
         // Assert
@@ -145,7 +146,7 @@ describe('Invoice Report Tests', function () {
             + '\nTotal GST: 7260';
 
         // Act
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
 
         let generateInvoiceReport = invoiceService.generateInvoiceReport();
         // Assert
@@ -163,7 +164,7 @@ describe('Invoice Report Tests', function () {
             + '\nTotal GST: 3360';
 
         // Act
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
 
         let generateInvoiceReport = invoiceService.generateInvoiceReport();
         // Assert
@@ -180,7 +181,7 @@ describe('Invoice Report Tests', function () {
             + '\nTotal GST: 2160';
 
         // Act
-        let invoiceService = new InvoiceService(monthlyUsageByClient, reportFormat, gstRates, servicePrices, freeConferenceHours);
+        let invoiceService = new InvoiceService(monthlyUsageByClient, servicesOffered, reportFormat, gstRates, servicePrices, freeConferenceHours);
 
         let generateInvoiceReport = invoiceService.generateInvoiceReport();
         // Assert

@@ -20,20 +20,19 @@ export class BillingItem {
         this.totalFreeConferenceHours = this.freeConferenceHoursPerUnit ? this.freeConferenceHoursPerUnit * this.quantity : null
     }
 
-    private calculateTotalGSTCost() {
+    private calculateCost() {
         if (this.getDescription() === 'hours of Conference Room usage') {
-            const freeConferenceHoursOfOtherServices = this.parentBillingItemsReference.getFreeConferenceHours() || 0;
-            return Math.floor(Math.max((this.quantity - freeConferenceHoursOfOtherServices) * this.unitPrice * (this.GSTRate), 0));
+            const freeConferenceHoursOfOtherServices = this.parentBillingItemsReference.getFreeConferenceHours();
+            return Math.floor(Math.max((this.quantity - freeConferenceHoursOfOtherServices) * this.unitPrice, 0));
         }
-        return Math.floor(this.quantity * this.unitPrice * this.GSTRate);
+        return Math.floor(this.quantity * this.unitPrice);
+    }
+    private calculateTotalGSTCost() {
+        return Math.floor(this.calculateCost() * this.GSTRate);
     }
 
     private calculateTotalCost() {
-        if (this.getDescription() === 'hours of Conference Room usage') {
-            const freeConferenceHoursOfOtherServices = this.parentBillingItemsReference.getFreeConferenceHours() || 0;
-            return Math.floor(Math.max((this.quantity - freeConferenceHoursOfOtherServices) * this.unitPrice * (1 + this.GSTRate), 0));
-        }
-        return Math.floor(this.quantity * this.unitPrice * (1 + this.GSTRate));
+        return Math.floor(this.calculateCost() + this.calculateTotalGSTCost());
     }
 
     getQuantity() {

@@ -6,6 +6,14 @@ Basic Assumptions
 4. InvoiceService is the main service which generates the invoice for the customer/client-company based on the usage input.
 
 
+Instructions to Run Code
+````````````````````````
+
+1. Clone the repository. (git@github.com:hanchau/tdd-invoice-report.git)
+2. Run `npm install` to install all the dependencies.
+3. Run `npm run test` to run the test cases.
+
+
 Tree Structure
 ``````````````
 ├── README.md

@@ -2,17 +2,17 @@ import {BillingItems} from "./BillingItems";
 
 export class ReportFormat {
 
-    generateBillingItems(monthlyUsageByClient: string, GSTRateList: Map<string, number>, ServicePriceList: Map<string, number>, freeConferenceHours: Map<string, number>) {
+    generateBillingItems(monthlyUsageByClient: string, servicesOffered: string[], gstRates: Map<string, number>, servicePrices: Map<string, number>, freeConferenceHours: Map<string, number>) {
         const billingItems = new BillingItems();
         const lines: string[] = monthlyUsageByClient.split('\n');
         for (const line of lines) {
             const [countStr, ...descriptionArray] = line.split(' ');
             const noOfItems = parseInt(countStr);
-            const descriptionOfItems = descriptionArray.join(' ');
-            if (!GSTRateList.has(descriptionOfItems)) {
+            const descriptionOfItem = descriptionArray.join(' ');
+            if (!servicesOffered.includes(descriptionOfItem)) {
                 throw new Error('Invalid usage type');
             }
-            billingItems.addItemWithInfo(descriptionOfItems, noOfItems, (GSTRateList.get(descriptionOfItems) || 0), (ServicePriceList.get(descriptionOfItems) || 0), (freeConferenceHours.get(descriptionOfItems) || null), billingItems);
+            billingItems.addItemWithInfo(descriptionOfItem, noOfItems, (gstRates.get(descriptionOfItem) || 0), (servicePrices.get(descriptionOfItem) || 0), (freeConferenceHours.get(descriptionOfItem) || null), billingItems);
         }
         return billingItems;
     }
